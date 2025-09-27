@@ -1,19 +1,15 @@
 // src/app/api/agendamentos/[id]/route.ts
 
-import { NextResponse, NextRequest } from 'next/server'; // Importe o NextRequest
+import { NextResponse, NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-// Este é o novo tipo que o Next.js espera para o segundo argumento
-interface Context {
-  params: {
-    id: string;
-  };
-}
-
-// Função para ATUALIZAR (PUT) com a assinatura correta
-export async function PUT(request: NextRequest, context: Context) {
+// Função para ATUALIZAR (PUT) com a assinatura 100% correta
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
-    const id = Number(context.params.id); // Pegamos o 'id' de 'context.params'
+    const id = Number(params.id);
     const body = await request.json();
     const { nome_cliente, data_hora } = body;
 
@@ -32,10 +28,13 @@ export async function PUT(request: NextRequest, context: Context) {
   }
 }
 
-// Função para DELETAR com a assinatura correta
-export async function DELETE(request: NextRequest, context: Context) {
+// Função para DELETAR com a assinatura 100% correta
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
-    const id = Number(context.params.id); // Pegamos o 'id' de 'context.params'
+    const id = Number(params.id);
 
     await prisma.agendamento.delete({
       where: { id },

@@ -2,7 +2,7 @@
 
 "use client";
 
-import Image from "next/image";
+// 'Image' foi removido pois não está sendo usado
 import { useState, useEffect, useCallback } from "react";
 import { SeletorDataAgenda } from "@/components/SeletorDataAgenda";
 import ListaAgendamentosDia from "@/components/ListaAgendamentosDia";
@@ -10,12 +10,19 @@ import { AgendamentoForm } from "@/components/AgendamentoForm";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
-// Interface para os nossos eventos de agendamento
+// CORREÇÃO 1: Definimos um tipo específico para o retorno da API
+interface ApiAgendamento {
+  id: number;
+  nome_cliente: string;
+  data_hora: string;
+}
+
+// CORREÇÃO 2: Trocamos 'any' por 'number' no resource
 export interface AgendamentoEvent {
   title: string | undefined;
   start: Date | undefined;
   end: Date | undefined;
-  resource: any;
+  resource: number; 
 }
 
 export default function Home() {
@@ -29,8 +36,11 @@ export default function Home() {
     setLoading(true);
     try {
       const response = await fetch('/api/agendamentos');
-      const data = await response.json();
-      const eventosFormatados: AgendamentoEvent[] = data.map((ag: any) => ({
+      // CORREÇÃO 3: Usamos nosso novo tipo para a 'data'
+      const data: ApiAgendamento[] = await response.json();
+      
+      // CORREÇÃO 4: Usamos o tipo específico no '.map'
+      const eventosFormatados: AgendamentoEvent[] = data.map((ag: ApiAgendamento) => ({
         title: ag.nome_cliente,
         start: new Date(ag.data_hora),
         end: new Date(new Date(ag.data_hora).getTime() + 60 * 60 * 1000),
@@ -48,6 +58,7 @@ export default function Home() {
     buscarTodosAgendamentos();
   }, [buscarTodosAgendamentos]);
 
+  // O resto do arquivo continua igual...
   const handleSuccess = () => {
     setModalAberto(false);
     setAgendamentoParaEditar(null);

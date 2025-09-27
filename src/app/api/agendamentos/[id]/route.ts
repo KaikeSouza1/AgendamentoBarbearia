@@ -1,18 +1,19 @@
 // src/app/api/agendamentos/[id]/route.ts
 
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server'; // Importe o NextRequest
 import { prisma } from '@/lib/prisma';
 
-interface RouteParams {
+// Este é o novo tipo que o Next.js espera para o segundo argumento
+interface Context {
   params: {
     id: string;
   };
 }
 
-// Função para ATUALIZAR (PUT) um agendamento existente
-export async function PUT(request: Request, { params }: RouteParams) {
+// Função para ATUALIZAR (PUT) com a assinatura correta
+export async function PUT(request: NextRequest, context: Context) {
   try {
-    const id = Number(params.id);
+    const id = Number(context.params.id); // Pegamos o 'id' de 'context.params'
     const body = await request.json();
     const { nome_cliente, data_hora } = body;
 
@@ -31,16 +32,16 @@ export async function PUT(request: Request, { params }: RouteParams) {
   }
 }
 
-// Função para DELETAR um agendamento
-export async function DELETE(request: Request, { params }: RouteParams) {
+// Função para DELETAR com a assinatura correta
+export async function DELETE(request: NextRequest, context: Context) {
   try {
-    const id = Number(params.id);
+    const id = Number(context.params.id); // Pegamos o 'id' de 'context.params'
 
     await prisma.agendamento.delete({
       where: { id },
     });
 
-    return new NextResponse(null, { status: 204 }); // 204 No Content = Sucesso sem corpo
+    return new NextResponse(null, { status: 204 });
   } catch (error) {
     console.error('Erro ao deletar agendamento:', error);
     return NextResponse.json({ message: 'Erro ao deletar agendamento' }, { status: 500 });

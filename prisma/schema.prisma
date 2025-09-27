@@ -1,0 +1,18 @@
+// Define o tipo de cliente que será gerado (JavaScript)
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Define a fonte de dados (nosso banco de dados)
+datasource db {
+  provider = "postgresql" // Estamos usando PostgreSQL
+  url      = env("DATABASE_URL") // Pega a string de conexão do arquivo .env
+}
+
+// Nosso modelo de tabela para os agendamentos
+model Agendamento {
+  id           Int      @id @default(autoincrement())
+  nome_cliente String
+  data_hora    DateTime
+  criado_em    DateTime @default(now())
+}

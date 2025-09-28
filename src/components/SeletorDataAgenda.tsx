@@ -1,5 +1,3 @@
-// src/components/SeletorDataAgenda.tsx
-
 "use client";
 
 import { format } from "date-fns";
@@ -20,7 +18,7 @@ export function SeletorDataAgenda({ dataSelecionada, onDataChange }: SeletorData
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-xl">Selecione o dia para ver a agenda.</CardTitle>
+        <CardTitle className="text-xl">Selecione o Dia</CardTitle>
       </CardHeader>
       <CardContent>
         <Popover>

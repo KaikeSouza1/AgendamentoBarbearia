@@ -110,6 +110,10 @@ export function AgendamentoForm({ onSuccess, agendamentoInicial }: AgendamentoFo
             </FormItem>
           )}
         />
+        
+        {/* =================================================================== */}
+        {/* A ESTRUTURA CORRETA DO SELETOR DE DATA ESTÁ AQUI */}
+        {/* =================================================================== */}
         <FormField
           control={form.control}
           name="data"
@@ -140,6 +144,8 @@ export function AgendamentoForm({ onSuccess, agendamentoInicial }: AgendamentoFo
             </FormItem>
           )}
         />
+        {/* =================================================================== */}
+
         <div>
           <FormLabel>Horário</FormLabel>
           <div className="grid grid-cols-4 gap-2 pt-2">

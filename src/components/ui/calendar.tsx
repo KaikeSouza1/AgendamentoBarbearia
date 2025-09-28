@@ -1,18 +1,26 @@
+// src/components/ui/calendar.tsx
+
 "use client"
 
 import * as React from "react"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight, X } from "lucide-react"
 import { DayPicker } from "react-day-picker"
+import { PopoverClose } from "@radix-ui/react-popover"
+import { format } from "date-fns" // Importação adicionada
+import { ptBR } from "date-fns/locale" // Importação adicionada
 
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
 
-export type CalendarProps = React.ComponentProps<typeof DayPicker>
+export type CalendarProps = React.ComponentProps<typeof DayPicker> & {
+  closeButton?: React.ReactNode
+}
 
 function Calendar({
   className,
   classNames,
   showOutsideDays = true,
+  closeButton,
   ...props
 }: CalendarProps) {
   return (
@@ -54,6 +62,17 @@ function Calendar({
       components={{
         IconLeft: () => <ChevronLeft className="h-4 w-4" />,
         IconRight: () => <ChevronRight className="h-4 w-4" />,
+        Caption: ({ ...captionProps }) => (
+          <div className="flex justify-center pt-1 relative items-center w-full">
+            <h2 className="text-sm font-medium">
+              {format(captionProps.displayMonth, "MMMM yyyy", { locale: ptBR })}
+            </h2>
+            {/* O botão de fechar agora fica dentro de um contêiner absoluto para melhor posicionamento */}
+            <div className="absolute right-0 flex items-center">
+              {closeButton}
+            </div>
+          </div>
+        ),
       }}
       {...props}
     />

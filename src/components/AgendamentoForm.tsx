@@ -1,5 +1,3 @@
-// src/components/AgendamentoForm.tsx
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -8,15 +6,15 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger, PopoverClose } from "@/components/ui/popover";
 import { AgendamentoEvent } from "../app/page";
 
 const horariosDisponiveis = Array.from({ length: 28 }, (_, i) => {
@@ -112,7 +110,6 @@ export function AgendamentoForm({ onSuccess, agendamentoInicial }: AgendamentoFo
             <FormItem>
               <FormLabel>Nome do Cliente</FormLabel>
               <FormControl>
-                {/* A ALTERAÇÃO FOI FEITA AQUI: removi o placeholder */}
                 <Input {...field} />
               </FormControl>
               <FormMessage />
@@ -155,6 +152,16 @@ export function AgendamentoForm({ onSuccess, agendamentoInicial }: AgendamentoFo
                     }
                     initialFocus
                     locale={ptBR}
+                    closeButton={
+                      <PopoverClose
+                        className={cn(
+                          buttonVariants({ variant: "outline", size: "icon" }),
+                          "h-7 w-7"
+                        )}
+                      >
+                        <X className="h-4 w-4" />
+                      </PopoverClose>
+                    }
                   />
                 </PopoverContent>
               </Popover>

@@ -1,3 +1,5 @@
+// src/components/ui/popover.tsx
+
 "use client"
 
 import * as React from "react"
@@ -8,6 +10,8 @@ import { cn } from "@/lib/utils"
 const Popover = PopoverPrimitive.Root
 
 const PopoverTrigger = PopoverPrimitive.Trigger
+
+const PopoverClose = PopoverPrimitive.Close // Adicionamos o PopoverClose aqui
 
 const PopoverContent = React.forwardRef<
   React.ElementRef<typeof PopoverPrimitive.Content>,
@@ -28,4 +32,5 @@ const PopoverContent = React.forwardRef<
 ))
 PopoverContent.displayName = PopoverPrimitive.Content.displayName
 
-export { Popover, PopoverTrigger, PopoverContent }
+// E adicionamos na lista de exportação
+export { Popover, PopoverTrigger, PopoverContent, PopoverClose }

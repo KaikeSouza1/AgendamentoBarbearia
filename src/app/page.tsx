@@ -1,8 +1,6 @@
 // src/app/page.tsx
-
 "use client";
 
-// 'Image' foi removido pois não está sendo usado
 import { useState, useEffect, useCallback } from "react";
 import { SeletorDataAgenda } from "@/components/SeletorDataAgenda";
 import ListaAgendamentosDia from "@/components/ListaAgendamentosDia";
@@ -10,14 +8,12 @@ import { AgendamentoForm } from "@/components/AgendamentoForm";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
-// CORREÇÃO 1: Definimos um tipo específico para o retorno da API
 interface ApiAgendamento {
   id: number;
   nome_cliente: string;
   data_hora: string;
 }
 
-// CORREÇÃO 2: Trocamos 'any' por 'number' no resource
 export interface AgendamentoEvent {
   title: string | undefined;
   start: Date | undefined;
@@ -27,7 +23,7 @@ export interface AgendamentoEvent {
 
 export default function Home() {
   const [modalAberto, setModalAberto] = useState(false);
-  const [dataSelecionada, setDataSelecionada] = useState(new Date());
+  const [dataSelecionada, setDataSelecionada] = useState<Date>(new Date());
   const [agendamentos, setAgendamentos] = useState<AgendamentoEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [agendamentoParaEditar, setAgendamentoParaEditar] = useState<AgendamentoEvent | null>(null);
@@ -36,10 +32,7 @@ export default function Home() {
     setLoading(true);
     try {
       const response = await fetch('/api/agendamentos');
-      // CORREÇÃO 3: Usamos nosso novo tipo para a 'data'
       const data: ApiAgendamento[] = await response.json();
-      
-      // CORREÇÃO 4: Usamos o tipo específico no '.map'
       const eventosFormatados: AgendamentoEvent[] = data.map((ag: ApiAgendamento) => ({
         title: ag.nome_cliente,
         start: new Date(ag.data_hora),
@@ -57,8 +50,13 @@ export default function Home() {
   useEffect(() => {
     buscarTodosAgendamentos();
   }, [buscarTodosAgendamentos]);
+  
+  const handleDataChange = (novaData: Date | undefined) => {
+    if (novaData) {
+      setDataSelecionada(novaData);
+    }
+  };
 
-  // O resto do arquivo continua igual...
   const handleSuccess = () => {
     setModalAberto(false);
     setAgendamentoParaEditar(null);
@@ -91,7 +89,7 @@ export default function Home() {
           <div className="lg:col-span-1 flex flex-col gap-6">
             <SeletorDataAgenda 
               dataSelecionada={dataSelecionada} 
-              onDataChange={setDataSelecionada} 
+              onDataChange={handleDataChange} 
             />
           </div>
           <div className="lg:col-span-2">
@@ -107,7 +105,7 @@ export default function Home() {
         </div>
       </div>
 
-      <Dialog open={modalAberto} onOpenChange={(isOpen: boolean) => {
+      <Dialog open={modalAberto} onOpenChange={(isOpen) => {
         if (!isOpen) setAgendamentoParaEditar(null);
         setModalAberto(isOpen);
       }}>

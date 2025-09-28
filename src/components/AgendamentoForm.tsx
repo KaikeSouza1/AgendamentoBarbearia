@@ -1,5 +1,3 @@
-// src/components/AgendamentoForm.tsx
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -11,7 +9,6 @@ import { ptBR } from "date-fns/locale";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -27,7 +24,7 @@ const horariosDisponiveis = Array.from({ length: 28 }, (_, i) => {
 
 const formSchema = z.object({
   nome_cliente: z.string().min(2, { message: "O nome deve ter pelo menos 2 caracteres." }),
-  data: z.date(),
+  data: z.date({ required_error: "A data do agendamento é obrigatória." }),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -45,8 +42,8 @@ export function AgendamentoForm({ onSuccess, agendamentoInicial }: AgendamentoFo
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      nome_cliente: agendamentoInicial?.title || "",
-      data: agendamentoInicial?.start || new Date(),
+      nome_cliente: "",
+      data: new Date(),
     },
   });
 
@@ -57,6 +54,9 @@ export function AgendamentoForm({ onSuccess, agendamentoInicial }: AgendamentoFo
         data: agendamentoInicial.start,
       });
       setHoraSelecionada(format(agendamentoInicial.start, 'HH:mm'));
+    } else {
+      form.reset({ nome_cliente: "", data: new Date() });
+      setHoraSelecionada(null);
     }
   }, [agendamentoInicial, form]);
 
@@ -83,13 +83,10 @@ export function AgendamentoForm({ onSuccess, agendamentoInicial }: AgendamentoFo
           data_hora: dataHoraFinal.toISOString(),
         }),
       });
-
       if (!response.ok) throw new Error('Falha ao salvar agendamento');
-      
       toast.success(`Agendamento para ${values.nome_cliente} foi salvo!`);
       onSuccess();
     } catch (error) {
-      console.error(error);
       toast.error("Oops! Algo deu errado ao salvar.");
     }
   }
@@ -103,17 +100,11 @@ export function AgendamentoForm({ onSuccess, agendamentoInicial }: AgendamentoFo
           render={({ field }) => (
             <FormItem>
               <FormLabel>Nome do Cliente</FormLabel>
-              <FormControl>
-                <Input placeholder="Ex: João da Silva" {...field} />
-              </FormControl>
+              <FormControl><Input placeholder="Ex: João da Silva" {...field} /></FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        
-        {/* =================================================================== */}
-        {/* A ESTRUTURA CORRETA DO SELETOR DE DATA ESTÁ AQUI */}
-        {/* =================================================================== */}
         <FormField
           control={form.control}
           name="data"
@@ -134,7 +125,7 @@ export function AgendamentoForm({ onSuccess, agendamentoInicial }: AgendamentoFo
                     mode="single"
                     selected={field.value}
                     onSelect={field.onChange}
-                    disabled={(date: Date) => date < new Date(new Date().setDate(new Date().getDate() - 1))}
+                    disabled={(date) => date < new Date(new Date().setDate(new Date().getDate() - 1))}
                     initialFocus
                     locale={ptBR}
                   />
@@ -144,8 +135,6 @@ export function AgendamentoForm({ onSuccess, agendamentoInicial }: AgendamentoFo
             </FormItem>
           )}
         />
-        {/* =================================================================== */}
-
         <div>
           <FormLabel>Horário</FormLabel>
           <div className="grid grid-cols-4 gap-2 pt-2">

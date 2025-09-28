@@ -3,7 +3,6 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-// Função para ATUALIZAR (PUT) com a assinatura 100% correta
 export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -28,7 +27,6 @@ export async function PUT(
   }
 }
 
-// Função para DELETAR com a assinatura 100% correta
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }

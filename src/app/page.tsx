@@ -1,32 +1,66 @@
 // src/app/page.tsx
+
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Dashboard from "@/components/Dashboard";
 import { SeletorDataAgenda } from "@/components/SeletorDataAgenda";
 import ListaAgendamentosDia from "@/components/ListaAgendamentosDia";
 import { AgendamentoForm } from "@/components/AgendamentoForm";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+// 1. Importe os componentes do Acordeão
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 interface ApiAgendamento {
   id: number;
   nome_cliente: string;
   data_hora: string;
 }
-
 export interface AgendamentoEvent {
   title: string | undefined;
   start: Date | undefined;
   end: Date | undefined;
   resource: number; 
 }
+interface DashboardData {
+  agendamentosHoje: number;
+  proximoCliente: {
+    nome: string;
+    horario: Date;
+  } | null;
+}
 
 export default function Home() {
   const [modalAberto, setModalAberto] = useState(false);
-  const [dataSelecionada, setDataSelecionada] = useState<Date>(new Date());
+  const [dataSelecionada, setDataSelecionada] = useState(new Date());
   const [agendamentos, setAgendamentos] = useState<AgendamentoEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [agendamentoParaEditar, setAgendamentoParaEditar] = useState<AgendamentoEvent | null>(null);
+
+  const [dashboardData, setDashboardData] = useState<DashboardData>({
+    agendamentosHoje: 0,
+    proximoCliente: null,
+  });
+  const [loadingDashboard, setLoadingDashboard] = useState(true);
+
+  const buscarDadosDashboard = useCallback(async () => {
+    setLoadingDashboard(true);
+    try {
+      const response = await fetch('/api/dashboard');
+      const data = await response.json();
+      setDashboardData(data);
+    } catch (error) {
+      console.error("Erro ao carregar dados do dashboard:", error);
+    } finally {
+      setLoadingDashboard(false);
+    }
+  }, []);
 
   const buscarTodosAgendamentos = useCallback(async () => {
     setLoading(true);
@@ -49,18 +83,14 @@ export default function Home() {
 
   useEffect(() => {
     buscarTodosAgendamentos();
-  }, [buscarTodosAgendamentos]);
-  
-  const handleDataChange = (novaData: Date | undefined) => {
-    if (novaData) {
-      setDataSelecionada(novaData);
-    }
-  };
+    buscarDadosDashboard();
+  }, [buscarTodosAgendamentos, buscarDadosDashboard]);
 
   const handleSuccess = () => {
     setModalAberto(false);
     setAgendamentoParaEditar(null);
     buscarTodosAgendamentos();
+    buscarDadosDashboard();
   };
 
   const handleOpenNewModal = () => {
@@ -84,12 +114,24 @@ export default function Home() {
             Novo Agendamento
           </Button>
         </div>
+
+        {/* 2. Envolva o Dashboard com o Acordeão */}
+        <Accordion type="single" collapsible className="w-full bg-card rounded-xl border shadow-sm px-6 mb-6">
+          <AccordionItem value="item-1">
+            <AccordionTrigger className="text-lg font-semibold">
+              Resumo do Dia
+            </AccordionTrigger>
+            <AccordionContent>
+              <Dashboard data={dashboardData} loading={loadingDashboard} />
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
           <div className="lg:col-span-1 flex flex-col gap-6">
             <SeletorDataAgenda 
               dataSelecionada={dataSelecionada} 
-              onDataChange={handleDataChange} 
+              onDataChange={(date) => date && setDataSelecionada(date)} 
             />
           </div>
           <div className="lg:col-span-2">
@@ -99,13 +141,16 @@ export default function Home() {
               onDataChange={setDataSelecionada}
               loading={loading}
               onEdit={handleOpenEditModal}
-              onDeleteSuccess={buscarTodosAgendamentos}
+              onDeleteSuccess={() => {
+                buscarTodosAgendamentos();
+                buscarDadosDashboard();
+              }}
             />
           </div>
         </div>
       </div>
 
-      <Dialog open={modalAberto} onOpenChange={(isOpen) => {
+      <Dialog open={modalAberto} onOpenChange={(isOpen: boolean) => {
         if (!isOpen) setAgendamentoParaEditar(null);
         setModalAberto(isOpen);
       }}>

@@ -18,7 +18,7 @@ export function SeletorDataAgenda({ dataSelecionada, onDataChange }: SeletorData
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-xl">Selecione o Dia</CardTitle>
+        <CardTitle className="text-xl">Selecione o dia para ver a agenda</CardTitle>
       </CardHeader>
       <CardContent>
         <Popover>

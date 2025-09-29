@@ -123,7 +123,7 @@ export function AgendamentoForm({ onSuccess, agendamentoInicial }: AgendamentoFo
           render={({ field }) => (
             <FormItem className="flex flex-col">
               <FormLabel>Data do Agendamento</FormLabel>
-              <Popover>
+              <Popover modal={true}>
                 <PopoverTrigger asChild>
                   <FormControl>
                     <Button

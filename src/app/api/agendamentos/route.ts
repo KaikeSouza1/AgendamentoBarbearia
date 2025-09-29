@@ -4,18 +4,13 @@ import { prisma } from '@/lib/prisma'; // Importamos nossa instância única do 
 // Função para BUSCAR (GET) os agendamentos
 export async function GET() {
   try {
-    // Usa o Prisma para buscar todos os registros da tabela Agendamento
     const agendamentos = await prisma.agendamento.findMany({
-      // Ordena os resultados pela data e hora, do mais antigo para o mais novo
       orderBy: {
         data_hora: 'asc',
       },
     });
-
-    // Retorna os agendamentos encontrados como JSON
     return NextResponse.json(agendamentos);
   } catch (error) {
-    // Em caso de erro, retorna uma mensagem de erro
     return NextResponse.json(
       { message: 'Erro ao buscar agendamentos.' },
       { status: 500 }
@@ -26,32 +21,44 @@ export async function GET() {
 // Função para CRIAR (POST) um novo agendamento
 export async function POST(request: Request) {
   try {
-    // Pega o corpo (body) da requisição, que deve ser um JSON
     const body = await request.json();
     const { nome_cliente, data_hora } = body;
+    const dataHoraAgendamento = new Date(data_hora);
 
-    // Validação simples para garantir que os campos necessários foram enviados
     if (!nome_cliente || !data_hora) {
       return NextResponse.json(
         { message: 'Nome do cliente e data/hora são obrigatórios.' },
-        { status: 400 } // 400 = Bad Request
+        { status: 400 }
       );
     }
 
-    // Usa o Prisma para criar um novo registro na tabela Agendamento
-    const novoAgendamento = await prisma.agendamento.create({
-      data: {
-        nome_cliente: nome_cliente,
-        // Converte a string de data recebida para o formato de data do JavaScript
-        data_hora: new Date(data_hora),
+    // --- INÍCIO DA VALIDAÇÃO ---
+    // 1. Verifica se já existe um agendamento para o mesmo horário
+    const agendamentoExistente = await prisma.agendamento.findFirst({
+      where: {
+        data_hora: dataHoraAgendamento,
       },
     });
 
-    // Retorna o agendamento recém-criado como JSON com status 201 (Criado)
+    // 2. Se encontrar um, retorna um erro de "Conflito"
+    if (agendamentoExistente) {
+      return NextResponse.json(
+        { message: 'Este horário já está ocupado. Por favor, escolha outro.' },
+        { status: 409 } // 409 = Conflict
+      );
+    }
+    // --- FIM DA VALIDAÇÃO ---
+
+    const novoAgendamento = await prisma.agendamento.create({
+      data: {
+        nome_cliente: nome_cliente,
+        data_hora: dataHoraAgendamento,
+      },
+    });
+
     return NextResponse.json(novoAgendamento, { status: 201 });
   } catch (error) {
-    // Em caso de erro no servidor, retorna uma mensagem de erro
-    console.error(error); // Mostra o erro no console do servidor para depuração
+    console.error(error);
     return NextResponse.json(
       { message: 'Erro ao criar agendamento.' },
       { status: 500 }

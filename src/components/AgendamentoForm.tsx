@@ -40,6 +40,7 @@ interface AgendamentoFormProps {
 export function AgendamentoForm({ onSuccess, agendamentoInicial }: AgendamentoFormProps) {
   const [horaSelecionada, setHoraSelecionada] = useState<string | null>(null);
   const [erroHora, setErroHora] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false); // 1. Adicionado estado de "enviando"
   const isEditMode = !!agendamentoInicial;
 
   const form = useForm<FormValues>({
@@ -72,6 +73,7 @@ export function AgendamentoForm({ onSuccess, agendamentoInicial }: AgendamentoFo
       return;
     }
     setErroHora(null);
+    setIsSubmitting(true); // 2. Desabilita o botão
 
     const [horas, minutos] = horaSelecionada.split(':').map(Number);
     const dataHoraFinal = new Date(values.data);
@@ -90,19 +92,31 @@ export function AgendamentoForm({ onSuccess, agendamentoInicial }: AgendamentoFo
         }),
       });
 
-      if (!response.ok) throw new Error('Falha ao salvar agendamento');
+      if (!response.ok) {
+        // Se a API retornar um erro de conflito (horário já agendado)
+        if (response.status === 409) {
+          const { message } = await response.json();
+          toast.error(message || "Este horário já está agendado.");
+        } else {
+          throw new Error('Falha ao salvar agendamento');
+        }
+        return; // Não executa o onSuccess
+      }
       
       toast.success(`Agendamento para ${values.nome_cliente} foi salvo!`);
       onSuccess();
     } catch (error) {
       console.error(error);
       toast.error("Oops! Algo deu errado ao salvar.");
+    } finally {
+      setIsSubmitting(false); // 3. Reabilita o botão no final
     }
   }
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        {/* ... (campos do formulário) ... */}
         <FormField
           control={form.control}
           name="nome_cliente"
@@ -181,7 +195,10 @@ export function AgendamentoForm({ onSuccess, agendamentoInicial }: AgendamentoFo
           </div>
           {erroHora && <p className="text-sm font-medium text-destructive mt-2">{erroHora}</p>}
         </div>
-        <Button type="submit" className="w-full">{isEditMode ? 'Salvar Alterações' : 'Salvar Agendamento'}</Button>
+        {/* 4. Adicionado 'disabled' ao botão */}
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
+          {isSubmitting ? 'Salvando...' : (isEditMode ? 'Salvar Alterações' : 'Salvar Agendamento')}
+        </Button>
       </form>
     </Form>
   );

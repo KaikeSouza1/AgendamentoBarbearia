@@ -3,13 +3,13 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Image from "next/image"; // 1. IMPORTAMOS O COMPONENTE DE IMAGEM
 import Dashboard from "@/components/Dashboard";
 import { SeletorDataAgenda } from "@/components/SeletorDataAgenda";
 import ListaAgendamentosDia from "@/components/ListaAgendamentosDia";
 import { AgendamentoForm } from "@/components/AgendamentoForm";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-// 1. Importe os componentes do Acordeão
 import {
   Accordion,
   AccordionContent,
@@ -107,15 +107,21 @@ export default function Home() {
     <main className="min-h-screen w-full bg-secondary p-4 sm:p-6 lg:p-8">
       <div className="mx-auto max-w-7xl">
         <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
-            Agendamento Emeze Barbearia
-          </h1>
+          
+          {/* 2. SUBSTITUÍMOS O H1 PELA IMAGEM */}
+          <Image
+            src="/logobarber.png" // O caminho para a imagem na pasta public
+            alt="Logo da Barbearia"
+            width={250} // Ajuste a largura conforme necessário
+            height={70} // Ajuste a altura conforme necessário
+            priority // Ajuda a carregar a imagem principal mais rápido
+          />
+
           <Button onClick={handleOpenNewModal} className="w-full sm:w-auto text-lg">
             Novo Agendamento
           </Button>
         </div>
 
-        {/* 2. Envolva o Dashboard com o Acordeão */}
         <Accordion type="single" collapsible className="w-full bg-card rounded-xl border shadow-sm px-6 mb-6">
           <AccordionItem value="item-1">
             <AccordionTrigger className="text-lg font-semibold">

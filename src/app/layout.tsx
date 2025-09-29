@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { Inter as FontSans } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
-import { Toaster } from "@/components/ui/sonner"; // 1. Importe o Toaster
+import { Toaster } from "@/components/ui/sonner";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -14,6 +14,9 @@ const fontSans = FontSans({
 export const metadata: Metadata = {
   title: "Emeze Barbearia",
   description: "Sistema de Agendamentos",
+  icons: {
+    icon: "/logo.png", // Caminho para o seu logo na pasta public
+  },
 };
 
 export default function RootLayout({
@@ -30,7 +33,7 @@ export default function RootLayout({
         )}
       >
         {children}
-        <Toaster richColors /> {/* 2. Adicione o componente aqui */}
+        <Toaster richColors />
       </body>
     </html>
   );

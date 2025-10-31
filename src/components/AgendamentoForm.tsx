@@ -23,11 +23,13 @@ const horariosDisponiveis = Array.from({ length: 28 }, (_, i) => {
     return `${hora.toString().padStart(2, '0')}:${minuto}`;
 });
 
+// 💡 1. ATUALIZADO O SCHEMA
 const formSchema = z.object({
   nome_cliente: z.string().min(2, { message: "O nome deve ter pelo menos 2 caracteres." }),
   data: z.date({
     required_error: "A data do agendamento é obrigatória.",
   }),
+  valor: z.coerce.number().min(0, { message: "O valor deve ser R$ 0 ou mais." }), // 💡 CAMPO ADICIONADO
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -40,7 +42,7 @@ interface AgendamentoFormProps {
 export function AgendamentoForm({ onSuccess, agendamentoInicial }: AgendamentoFormProps) {
   const [horaSelecionada, setHoraSelecionada] = useState<string | null>(null);
   const [erroHora, setErroHora] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false); // 1. Adicionado estado de "enviando"
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const isEditMode = !!agendamentoInicial;
 
   const form = useForm<FormValues>({
@@ -48,32 +50,37 @@ export function AgendamentoForm({ onSuccess, agendamentoInicial }: AgendamentoFo
     defaultValues: {
       nome_cliente: "",
       data: new Date(),
+      valor: 0, // 💡 VALOR PADRÃO
     },
   });
 
+  // 💡 2. ATUALIZADO O USEEFFECT
   useEffect(() => {
     if (agendamentoInicial?.start) {
       form.reset({
         nome_cliente: agendamentoInicial.title || "",
         data: agendamentoInicial.start,
+        valor: agendamentoInicial.valor || 0, // 💡 CAMPO ADICIONADO
       });
       setHoraSelecionada(format(agendamentoInicial.start, 'HH:mm'));
     } else {
       form.reset({
         nome_cliente: "",
         data: new Date(),
+        valor: 0, // 💡 CAMPO ADICIONADO
       });
       setHoraSelecionada(null);
     }
   }, [agendamentoInicial, form]);
 
+  // 💡 3. ATUALIZADO O ONSUBMIT
   async function onSubmit(values: FormValues) {
     if (!horaSelecionada) {
       setErroHora("Selecione um horário.");
       return;
     }
     setErroHora(null);
-    setIsSubmitting(true); // 2. Desabilita o botão
+    setIsSubmitting(true);
 
     const [horas, minutos] = horaSelecionada.split(':').map(Number);
     const dataHoraFinal = new Date(values.data);
@@ -89,18 +96,18 @@ export function AgendamentoForm({ onSuccess, agendamentoInicial }: AgendamentoFo
         body: JSON.stringify({
           nome_cliente: values.nome_cliente,
           data_hora: dataHoraFinal.toISOString(),
+          valor: values.valor, // 💡 CAMPO ADICIONADO
         }),
       });
 
       if (!response.ok) {
-        // Se a API retornar um erro de conflito (horário já agendado)
         if (response.status === 409) {
           const { message } = await response.json();
           toast.error(message || "Este horário já está agendado.");
         } else {
           throw new Error('Falha ao salvar agendamento');
         }
-        return; // Não executa o onSuccess
+        return; 
       }
       
       toast.success(`Agendamento para ${values.nome_cliente} foi salvo!`);
@@ -109,14 +116,14 @@ export function AgendamentoForm({ onSuccess, agendamentoInicial }: AgendamentoFo
       console.error(error);
       toast.error("Oops! Algo deu errado ao salvar.");
     } finally {
-      setIsSubmitting(false); // 3. Reabilita o botão no final
+      setIsSubmitting(false);
     }
   }
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        {/* ... (campos do formulário) ... */}
+        
         <FormField
           control={form.control}
           name="nome_cliente"
@@ -125,6 +132,32 @@ export function AgendamentoForm({ onSuccess, agendamentoInicial }: AgendamentoFo
               <FormLabel>Nome do Cliente</FormLabel>
               <FormControl>
                 <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        {/* 💡 4. CAMPO DE VALOR ADICIONADO */}
+        <FormField
+          control={form.control}
+          name="valor"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Valor (R$)</FormLabel>
+              <FormControl>
+                {/* Wrapper para o prefixo "R$" */}
+                <div className="relative">
+                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground text-sm">
+                    R$
+                  </span>
+                  <Input 
+                    type="number" 
+                    step="0.01" 
+                    className="pl-9" // Adiciona padding para o "R$"
+                    {...field} 
+                  />
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -195,7 +228,7 @@ export function AgendamentoForm({ onSuccess, agendamentoInicial }: AgendamentoFo
           </div>
           {erroHora && <p className="text-sm font-medium text-destructive mt-2">{erroHora}</p>}
         </div>
-        {/* 4. Adicionado 'disabled' ao botão */}
+        
         <Button type="submit" className="w-full" disabled={isSubmitting}>
           {isSubmitting ? 'Salvando...' : (isEditMode ? 'Salvar Alterações' : 'Salvar Agendamento')}
         </Button>

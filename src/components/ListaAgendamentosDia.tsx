@@ -21,6 +21,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import { formatCurrency } from '@/lib/utils'; // 💡 IMPORTADO
 
 interface ListaAgendamentosDiaProps {
   agendamentos: AgendamentoEvent[];
@@ -91,7 +92,13 @@ export default function ListaAgendamentosDia({ agendamentos, dataSelecionada, on
                     <span className="font-bold text-lg text-primary w-20 text-center">
                       {format(ag.start!, 'HH:mm')}
                     </span>
-                    <span className="text-foreground text-lg">{ag.title}</span>
+                     {/* 💡 DIV PARA NOME E VALOR */}
+                    <div className="flex flex-col">
+                      <span className="text-foreground text-lg">{ag.title}</span>
+                      <span className="text-sm text-green-600 font-medium">
+                        {formatCurrency(ag.valor)} {/* 💡 VALOR ADICIONADO */}
+                      </span>
+                    </div>
                   </div>
                   <div className="flex items-center gap-2">
                     <Button variant="outline" size="icon" className="h-9 w-9" onClick={() => onEdit(ag)}>

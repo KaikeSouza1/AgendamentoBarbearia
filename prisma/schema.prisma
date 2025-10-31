@@ -1,3 +1,6 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
 // Define o tipo de cliente que será gerado (JavaScript)
 generator client {
   provider = "prisma-client-js"
@@ -14,5 +17,6 @@ model Agendamento {
   id           Int      @id @default(autoincrement())
   nome_cliente String
   data_hora    DateTime
+  valor        Decimal  @default(0) // 💡 CAMPO ADICIONADO
   criado_em    DateTime @default(now())
 }

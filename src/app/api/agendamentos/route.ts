@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma'; // Importamos nossa instância única do Prisma
+import { Prisma } from '@prisma/client'; // 💡 Importar Prisma para o tipo Decimal
 
 // Função para BUSCAR (GET) os agendamentos
 export async function GET() {
@@ -22,7 +23,8 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { nome_cliente, data_hora } = body;
+    // 💡 1. ADICIONADO "valor"
+    const { nome_cliente, data_hora, valor } = body;
     const dataHoraAgendamento = new Date(data_hora);
 
     if (!nome_cliente || !data_hora) {
@@ -33,14 +35,12 @@ export async function POST(request: Request) {
     }
 
     // --- INÍCIO DA VALIDAÇÃO ---
-    // 1. Verifica se já existe um agendamento para o mesmo horário
     const agendamentoExistente = await prisma.agendamento.findFirst({
       where: {
         data_hora: dataHoraAgendamento,
       },
     });
 
-    // 2. Se encontrar um, retorna um erro de "Conflito"
     if (agendamentoExistente) {
       return NextResponse.json(
         { message: 'Este horário já está ocupado. Por favor, escolha outro.' },
@@ -53,6 +53,8 @@ export async function POST(request: Request) {
       data: {
         nome_cliente: nome_cliente,
         data_hora: dataHoraAgendamento,
+        // 💡 2. CAMPO ADICIONADO (convertendo para Decimal)
+        valor: new Prisma.Decimal(valor || 0),
       },
     });
 

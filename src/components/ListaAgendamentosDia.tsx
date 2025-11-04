@@ -39,6 +39,13 @@ export default function ListaAgendamentosDia({ agendamentos, dataSelecionada, on
     .filter(ag => ag.start && isSameDay(ag.start, dataSelecionada))
     .sort((a, b) => a.start!.getTime() - b.start!.getTime());
 
+  // 💡 1. CALCULAR O TOTAL DO DIA
+  const totalDoDia = agendamentosDoDia.reduce((total, agendamento) => {
+    // Garante que o valor é um número antes de somar
+    const valorNumerico = typeof agendamento.valor === 'number' ? agendamento.valor : 0;
+    return total + valorNumerico;
+  }, 0);
+
   const handlePreviousDay = () => onDataChange(subDays(dataSelecionada, 1));
   const handleNextDay = () => onDataChange(addDays(dataSelecionada, 1));
   const handleToday = () => onDataChange(new Date());
@@ -65,11 +72,25 @@ export default function ListaAgendamentosDia({ agendamentos, dataSelecionada, on
     <>
       <Card className="min-h-[400px]">
         <CardHeader>
+          {/* 💡 2. LAYOUT DO CABEÇALHO ATUALIZADO */}
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-              <CardTitle className="flex items-center gap-2 text-xl md:text-2xl text-foreground">
-                  <CalendarDays className="h-6 w-6" />
-                  <span>{format(dataSelecionada, "eeee, dd 'de' MMMM", { locale: ptBR })}</span>
-              </CardTitle>
+              
+              {/* Div para agrupar Título e Total */}
+              <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4">
+                <CardTitle className="flex items-center gap-2 text-xl md:text-2xl text-foreground">
+                    <CalendarDays className="h-6 w-6" />
+                    <span>{format(dataSelecionada, "eeee, dd 'de' MMMM", { locale: ptBR })}</span>
+                </CardTitle>
+                
+                {/* 💡 3. TOTAL DO DIA EXIBIDO AQUI */}
+                {!loading && (
+                  <span className="text-lg font-semibold text-green-600 mt-1 sm:mt-0">
+                    Total: {formatCurrency(totalDoDia)}
+                  </span>
+                )}
+              </div>
+              
+              {/* Botões de Navegação */}
               <div className="flex space-x-2">
                   <Button variant="outline" onClick={handleToday}>Hoje</Button>
                   <Button variant="outline" size="icon" onClick={handlePreviousDay}><ChevronLeft className="h-4 w-4" /></Button>
@@ -92,11 +113,11 @@ export default function ListaAgendamentosDia({ agendamentos, dataSelecionada, on
                     <span className="font-bold text-lg text-primary w-20 text-center">
                       {format(ag.start!, 'HH:mm')}
                     </span>
-                     {/* 💡 DIV PARA NOME E VALOR */}
+                     {/* DIV PARA NOME E VALOR */}
                     <div className="flex flex-col">
                       <span className="text-foreground text-lg">{ag.title}</span>
                       <span className="text-sm text-green-600 font-medium">
-                        {formatCurrency(ag.valor)} {/* 💡 VALOR ADICIONADO */}
+                        {formatCurrency(ag.valor)}
                       </span>
                     </div>
                   </div>

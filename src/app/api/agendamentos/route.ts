@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma'; // Importamos nossa instância única do Prisma
 import { Prisma } from '@prisma/client'; // 💡 Importar Prisma para o tipo Decimal
 
+// 💡 ADICIONE ESTA LINHA PARA FORÇAR A ROTA A SER DINÂMICA
+export const dynamic = 'force-dynamic';
+
 // Função para BUSCAR (GET) os agendamentos
 export async function GET() {
   try {
@@ -20,6 +23,7 @@ export async function GET() {
 }
 
 // Função para CRIAR (POST) um novo agendamento
+// (Handlers POST já são dinâmicos por padrão, mas a linha acima afeta o GET)
 export async function POST(request: Request) {
   try {
     const body = await request.json();

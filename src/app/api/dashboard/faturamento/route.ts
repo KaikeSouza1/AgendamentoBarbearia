@@ -5,6 +5,9 @@ import { prisma } from '@/lib/prisma';
 import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
+// 💡 ADICIONE ESTA LINHA PARA FORÇAR A ROTA A SER DINÂMICA
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const hoje = new Date();

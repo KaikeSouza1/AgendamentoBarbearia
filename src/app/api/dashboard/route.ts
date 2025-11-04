@@ -5,6 +5,9 @@ import { prisma } from '@/lib/prisma';
 import { startOfDay, endOfDay, parseISO } from 'date-fns';
 import type { Agendamento } from '@prisma/client';
 
+// 💡 ADICIONE ESTA LINHA PARA FORÇAR A ROTA A SER DINÂMICA
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);

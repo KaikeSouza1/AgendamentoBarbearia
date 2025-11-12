@@ -194,9 +194,7 @@ export function AgendamentoForm({ onSuccess, agendamentoInicial }: AgendamentoFo
                     mode="single"
                     selected={field.value}
                     onSelect={field.onChange}
-                    disabled={(date: Date) =>
-                      date < new Date(new Date().setDate(new Date().getDate() - 1))
-                    }
+                    // ✅ RESTRIÇÃO DE DATA REMOVIDA
                     initialFocus
                     locale={ptBR}
                     closeButton={
